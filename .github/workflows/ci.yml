@@ -3,8 +3,16 @@ name: CI
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.github/dependabot.yml'
   pull_request:
     branches: [main, master]
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+      - '.github/dependabot.yml'
 
 env:
   CARGO_TERM_COLOR: always
