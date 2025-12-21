@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths-ignore:
       - '**.md'
       - 'LICENSE'
       - '.github/dependabot.yml'
   pull_request:
-    branches: [main, master]
+    branches: [main]
     paths-ignore:
       - '**.md'
       - 'LICENSE'
