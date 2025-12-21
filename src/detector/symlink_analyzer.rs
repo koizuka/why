@@ -39,10 +39,10 @@ pub fn resolve_final_path(path: &Path) -> PathBuf {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::os::unix::fs::symlink;
     use tempfile::tempdir;
 
     #[test]
+    #[cfg(unix)]
     fn test_non_symlink_path() {
         let path = PathBuf::from("/bin/ls");
         if path.exists() {
@@ -60,8 +60,11 @@ mod tests {
         assert_eq!(chain[0], path);
     }
 
+    #[cfg(unix)]
     #[test]
     fn test_single_symlink() {
+        use std::os::unix::fs::symlink;
+
         let dir = tempdir().unwrap();
         let original = dir.path().join("original");
         let link = dir.path().join("link");
@@ -75,8 +78,11 @@ mod tests {
         // The second element should resolve to the original file
     }
 
+    #[cfg(unix)]
     #[test]
     fn test_symlink_chain() {
+        use std::os::unix::fs::symlink;
+
         let dir = tempdir().unwrap();
         let original = dir.path().join("original");
         let link1 = dir.path().join("link1");
