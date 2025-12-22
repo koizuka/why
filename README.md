@@ -11,9 +11,10 @@ Similar to `npm why`, but for system-wide commands. When you run `why <command>`
 ```bash
 git clone https://github.com/koizuka/why.git
 cd why
-cargo build --release
-cp target/release/why /usr/local/bin/
+cargo install --path .
 ```
+
+This installs the `why` binary to `~/.cargo/bin/`, which should already be in your PATH if you have Rust installed.
 
 ### From releases
 
