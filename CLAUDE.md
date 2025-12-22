@@ -1,0 +1,51 @@
+# why
+
+コマンドがどのパッケージマネージャーでインストールされたかを特定するCLIツール。
+
+## プロジェクト構造
+
+```
+src/
+├── main.rs          # CLIエントリーポイント
+├── lib.rs           # ライブラリルート
+├── cli.rs           # clap引数定義
+├── error.rs         # エラー型定義
+├── detector/        # コマンド検出ロジック
+│   ├── mod.rs
+│   ├── path_resolver.rs    # which crate でパス解決
+│   └── symlink_analyzer.rs # シンボリックリンク追跡
+├── package_managers/ # 各パッケージマネージャー検出
+│   ├── mod.rs       # PackageManagerDetector trait
+│   ├── homebrew.rs  # macOS/Linux
+│   ├── npm.rs       # クロスプラットフォーム
+│   ├── bun.rs       # クロスプラットフォーム
+│   ├── apt.rs       # Linux (Debian/Ubuntu)
+│   ├── chocolatey.rs # Windows
+│   └── system.rs    # OS標準コマンド
+└── platform/
+    └── mod.rs       # プラットフォーム判定
+```
+
+## 開発コマンド
+
+```bash
+cargo build           # ビルド
+cargo test            # テスト実行
+cargo clippy          # Lint
+cargo fmt             # フォーマット
+cargo run -- <command> # 実行 (例: cargo run -- git)
+```
+
+## CI/CD
+
+- GitHub Actions で Ubuntu/macOS/Windows をテスト
+- タグプッシュ (`v*`) で自動リリース
+
+## 対応パッケージマネージャー
+
+- Homebrew (macOS, Linux)
+- npm -g
+- bun -g
+- apt (Debian/Ubuntu)
+- Chocolatey (Windows)
+- OS標準 (System)
