@@ -2,6 +2,7 @@ mod bun;
 mod cargo;
 mod go;
 mod homebrew;
+mod nix;
 mod npm;
 mod pipx;
 mod pnpm;
@@ -10,6 +11,8 @@ mod yarn;
 
 #[cfg(target_os = "linux")]
 mod apt;
+#[cfg(target_os = "linux")]
+mod snap;
 
 #[cfg(target_os = "windows")]
 mod chocolatey;
@@ -102,12 +105,14 @@ impl PackageManagerRegistry {
             Box::new(go::GoDetector::new()),
             Box::new(yarn::YarnGlobalDetector::new()),
             Box::new(pnpm::PnpmGlobalDetector::new()),
+            Box::new(nix::NixDetector::new()),
             Box::new(system::SystemDetector::new()),
         ];
 
         #[cfg(target_os = "linux")]
         {
             detectors.push(Box::new(apt::AptDetector::new()));
+            detectors.push(Box::new(snap::SnapDetector::new()));
         }
 
         #[cfg(target_os = "windows")]

@@ -24,7 +24,9 @@ src/
 │   ├── go.rs        # クロスプラットフォーム (go install)
 │   ├── yarn.rs      # クロスプラットフォーム (yarn global)
 │   ├── pnpm.rs      # クロスプラットフォーム (pnpm global)
+│   ├── nix.rs       # macOS/Linux
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
+│   ├── snap.rs      # Linux
 │   ├── chocolatey.rs # Windows
 │   ├── winget.rs    # Windows
 │   ├── scoop.rs     # Windows
@@ -58,7 +60,9 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 - Cargo (クロスプラットフォーム)
 - pipx (クロスプラットフォーム)
 - go install (クロスプラットフォーム)
+- Nix (macOS, Linux)
 - apt (Debian/Ubuntu)
+- Snap (Linux)
 - Chocolatey (Windows)
 - Winget (Windows)
 - Scoop (Windows)
