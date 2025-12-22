@@ -8,6 +8,10 @@ mod apt;
 
 #[cfg(target_os = "windows")]
 mod chocolatey;
+#[cfg(target_os = "windows")]
+mod scoop;
+#[cfg(target_os = "windows")]
+mod winget;
 
 use crate::platform::Platform;
 use serde::Serialize;
@@ -98,6 +102,8 @@ impl PackageManagerRegistry {
 
         #[cfg(target_os = "windows")]
         {
+            detectors.push(Box::new(winget::WingetDetector::new()));
+            detectors.push(Box::new(scoop::ScoopDetector::new()));
             detectors.push(Box::new(chocolatey::ChocolateyDetector::new()));
         }
 
