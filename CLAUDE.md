@@ -21,6 +21,8 @@ src/
 │   ├── bun.rs       # クロスプラットフォーム
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
 │   ├── chocolatey.rs # Windows
+│   ├── winget.rs    # Windows
+│   ├── scoop.rs     # Windows
 │   └── system.rs    # OS標準コマンド
 └── platform/
     └── mod.rs       # プラットフォーム判定
@@ -48,4 +50,6 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 - bun -g
 - apt (Debian/Ubuntu)
 - Chocolatey (Windows)
+- Winget (Windows)
+- Scoop (Windows)
 - OS標準 (System)
