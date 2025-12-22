@@ -72,7 +72,11 @@ why -v git
 | Homebrew | macOS, Linux | Cellar path pattern |
 | npm (global) | All | node_modules path |
 | bun (global) | All | .bun/bin path |
+| yarn (global) | All | .yarn/bin path |
+| pnpm (global) | All | pnpm global path |
 | Cargo | All | .cargo/bin path |
+| pipx | All | pipx venvs path |
+| go install | All | go/bin path |
 | apt | Linux (Debian/Ubuntu) | dpkg query |
 | Chocolatey | Windows | ProgramData path |
 | Winget | Windows | WindowsApps path |

@@ -16,7 +16,8 @@ Description: create a pull request
 
 1. **プリチェック（現在のブランチで実行）**：
    以下のコマンドを並列実行し、すべてが成功することを確認：
-   - `cargo test` - テストを実行（最優先）
+   - `cargo fmt -- --check` - フォーマットチェック
+   - `cargo test` - テストを実行
    - `cargo clippy -- -D warnings` - Lintチェック
    - `cargo build` - ビルド確認
 

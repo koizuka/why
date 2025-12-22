@@ -20,6 +20,10 @@ src/
 │   ├── npm.rs       # クロスプラットフォーム
 │   ├── bun.rs       # クロスプラットフォーム
 │   ├── cargo.rs     # クロスプラットフォーム
+│   ├── pipx.rs      # クロスプラットフォーム
+│   ├── go.rs        # クロスプラットフォーム (go install)
+│   ├── yarn.rs      # クロスプラットフォーム (yarn global)
+│   ├── pnpm.rs      # クロスプラットフォーム (pnpm global)
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
 │   ├── chocolatey.rs # Windows
 │   ├── winget.rs    # Windows
@@ -49,7 +53,11 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 - Homebrew (macOS, Linux)
 - npm -g
 - bun -g
+- yarn -g
+- pnpm -g
 - Cargo (クロスプラットフォーム)
+- pipx (クロスプラットフォーム)
+- go install (クロスプラットフォーム)
 - apt (Debian/Ubuntu)
 - Chocolatey (Windows)
 - Winget (Windows)

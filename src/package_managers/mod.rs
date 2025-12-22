@@ -1,8 +1,12 @@
 mod bun;
 mod cargo;
+mod go;
 mod homebrew;
 mod npm;
+mod pipx;
+mod pnpm;
 mod system;
+mod yarn;
 
 #[cfg(target_os = "linux")]
 mod apt;
@@ -94,6 +98,10 @@ impl PackageManagerRegistry {
             Box::new(npm::NpmGlobalDetector::new()),
             Box::new(bun::BunGlobalDetector::new()),
             Box::new(cargo::CargoDetector::new()),
+            Box::new(pipx::PipxDetector::new()),
+            Box::new(go::GoDetector::new()),
+            Box::new(yarn::YarnGlobalDetector::new()),
+            Box::new(pnpm::PnpmGlobalDetector::new()),
             Box::new(system::SystemDetector::new()),
         ];
 
