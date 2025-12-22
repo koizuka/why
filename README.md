@@ -72,8 +72,11 @@ why -v git
 | Homebrew | macOS, Linux | Cellar path pattern |
 | npm (global) | All | node_modules path |
 | bun (global) | All | .bun/bin path |
+| Cargo | All | .cargo/bin path |
 | apt | Linux (Debian/Ubuntu) | dpkg query |
 | Chocolatey | Windows | ProgramData path |
+| Winget | Windows | WindowsApps path |
+| Scoop | Windows | scoop/apps path |
 | System | All | OS standard paths |
 
 ## How It Works

@@ -19,6 +19,7 @@ src/
 │   ├── homebrew.rs  # macOS/Linux
 │   ├── npm.rs       # クロスプラットフォーム
 │   ├── bun.rs       # クロスプラットフォーム
+│   ├── cargo.rs     # クロスプラットフォーム
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
 │   ├── chocolatey.rs # Windows
 │   ├── winget.rs    # Windows
@@ -48,6 +49,7 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 - Homebrew (macOS, Linux)
 - npm -g
 - bun -g
+- Cargo (クロスプラットフォーム)
 - apt (Debian/Ubuntu)
 - Chocolatey (Windows)
 - Winget (Windows)
