@@ -77,7 +77,9 @@ why -v git
 | Cargo | All | .cargo/bin path |
 | pipx | All | pipx venvs path |
 | go install | All | go/bin path |
+| Nix | macOS, Linux | /nix/store, .nix-profile path |
 | apt | Linux (Debian/Ubuntu) | dpkg query |
+| Snap | Linux | /snap/bin path |
 | Chocolatey | Windows | ProgramData path |
 | Winget | Windows | WindowsApps path |
 | Scoop | Windows | scoop/apps path |
