@@ -25,7 +25,7 @@ which = "8.0"
 regex = "1.10"
 
 # Colored output
-colored = "2.1"
+colored = "3.0"
 
 # Cross-platform home directory
 dirs = "5.0"
