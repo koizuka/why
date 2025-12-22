@@ -24,7 +24,7 @@ impl PackageManagerDetector for BunGlobalDetector {
     }
 
     fn priority(&self) -> i32 {
-        90
+        95 // Higher than npm (90) to check bun paths first
     }
 
     fn detect(&self, ctx: &DetectionContext) -> Option<DetectionResult> {
