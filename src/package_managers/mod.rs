@@ -1,4 +1,5 @@
 mod bun;
+mod cargo;
 mod homebrew;
 mod npm;
 mod system;
@@ -92,6 +93,7 @@ impl PackageManagerRegistry {
             Box::new(homebrew::HomebrewDetector::new()),
             Box::new(npm::NpmGlobalDetector::new()),
             Box::new(bun::BunGlobalDetector::new()),
+            Box::new(cargo::CargoDetector::new()),
             Box::new(system::SystemDetector::new()),
         ];
 
