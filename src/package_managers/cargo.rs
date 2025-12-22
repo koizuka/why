@@ -75,11 +75,7 @@ mod tests {
     #[test]
     fn test_detects_cargo_unix() {
         let detector = CargoDetector::new();
-        let ctx = make_context(
-            "rg",
-            vec!["/home/user/.cargo/bin/rg"],
-            Platform::Linux,
-        );
+        let ctx = make_context("rg", vec!["/home/user/.cargo/bin/rg"], Platform::Linux);
         let result = detector.detect(&ctx);
         assert!(result.is_some());
         let result = result.unwrap();
@@ -90,11 +86,7 @@ mod tests {
     #[test]
     fn test_detects_cargo_macos() {
         let detector = CargoDetector::new();
-        let ctx = make_context(
-            "bat",
-            vec!["/Users/user/.cargo/bin/bat"],
-            Platform::MacOS,
-        );
+        let ctx = make_context("bat", vec!["/Users/user/.cargo/bin/bat"], Platform::MacOS);
         let result = detector.detect(&ctx);
         assert!(result.is_some());
         let result = result.unwrap();
@@ -120,11 +112,7 @@ mod tests {
     #[test]
     fn test_ignores_non_cargo_paths() {
         let detector = CargoDetector::new();
-        let ctx = make_context(
-            "rg",
-            vec!["/usr/bin/rg"],
-            Platform::Linux,
-        );
+        let ctx = make_context("rg", vec!["/usr/bin/rg"], Platform::Linux);
         let result = detector.detect(&ctx);
         assert!(result.is_none());
     }
