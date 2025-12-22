@@ -20,7 +20,7 @@ src/
 │   ├── npm.rs       # クロスプラットフォーム
 │   ├── bun.rs       # クロスプラットフォーム
 │   ├── cargo.rs     # クロスプラットフォーム
-│   ├── pip.rs       # クロスプラットフォーム (pipx)
+│   ├── pipx.rs      # クロスプラットフォーム
 │   ├── go.rs        # クロスプラットフォーム (go install)
 │   ├── yarn.rs      # クロスプラットフォーム (yarn global)
 │   ├── pnpm.rs      # クロスプラットフォーム (pnpm global)

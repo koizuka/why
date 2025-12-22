@@ -22,7 +22,7 @@ impl PackageManagerDetector for PipxDetector {
     }
 
     fn supports_platform(&self, _platform: Platform) -> bool {
-        true // pip is cross-platform
+        true // pipx is cross-platform
     }
 
     fn priority(&self) -> i32 {
@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn test_ignores_local_bin() {
-        // ~/.local/bin is used by many tools, not just pip
+        // ~/.local/bin is used by many tools, so we don't detect it
         let detector = PipxDetector::new();
         let ctx = make_context(
             "some-tool",

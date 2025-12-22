@@ -3,7 +3,7 @@ mod cargo;
 mod go;
 mod homebrew;
 mod npm;
-mod pip;
+mod pipx;
 mod pnpm;
 mod system;
 mod yarn;
@@ -98,7 +98,7 @@ impl PackageManagerRegistry {
             Box::new(npm::NpmGlobalDetector::new()),
             Box::new(bun::BunGlobalDetector::new()),
             Box::new(cargo::CargoDetector::new()),
-            Box::new(pip::PipxDetector::new()),
+            Box::new(pipx::PipxDetector::new()),
             Box::new(go::GoDetector::new()),
             Box::new(yarn::YarnGlobalDetector::new()),
             Box::new(pnpm::PnpmGlobalDetector::new()),

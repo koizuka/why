@@ -86,7 +86,11 @@ mod tests {
     #[test]
     fn test_detects_go_macos() {
         let detector = GoDetector::new();
-        let ctx = make_context("lazygit", vec!["/Users/user/go/bin/lazygit"], Platform::MacOS);
+        let ctx = make_context(
+            "lazygit",
+            vec!["/Users/user/go/bin/lazygit"],
+            Platform::MacOS,
+        );
         let result = detector.detect(&ctx);
         assert!(result.is_some());
         let result = result.unwrap();

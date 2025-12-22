@@ -122,7 +122,11 @@ mod tests {
     #[test]
     fn test_detects_yarn_bin_unix() {
         let detector = YarnGlobalDetector::new();
-        let ctx = make_context("create-react-app", vec!["/home/user/.yarn/bin/create-react-app"], Platform::Linux);
+        let ctx = make_context(
+            "create-react-app",
+            vec!["/home/user/.yarn/bin/create-react-app"],
+            Platform::Linux,
+        );
         let result = detector.detect(&ctx);
         assert!(result.is_some());
         let result = result.unwrap();
