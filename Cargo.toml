@@ -19,7 +19,7 @@ thiserror = "2.0"
 anyhow = "1.0"
 
 # Cross-platform which
-which = "6.0"
+which = "8.0"
 
 # Regex for pattern matching
 regex = "1.10"
