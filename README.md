@@ -78,6 +78,8 @@ why -v git
 | Cargo | All | .cargo/bin path |
 | pipx | All | pipx venvs path |
 | go install | All | go/bin path |
+| gem (RubyGems) | All | .gem/ruby path |
+| mise | All | mise/installs path |
 | Nix | macOS, Linux | /nix/store, .nix-profile path |
 | apt | Linux (Debian/Ubuntu) | dpkg query |
 | Snap | Linux | /snap/bin path |

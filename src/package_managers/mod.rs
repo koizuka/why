@@ -1,7 +1,9 @@
 mod bun;
 mod cargo;
+mod gem;
 mod go;
 mod homebrew;
+mod mise;
 mod nix;
 mod npm;
 mod pipx;
@@ -105,6 +107,8 @@ impl PackageManagerRegistry {
             Box::new(go::GoDetector::new()),
             Box::new(yarn::YarnGlobalDetector::new()),
             Box::new(pnpm::PnpmGlobalDetector::new()),
+            Box::new(gem::GemDetector::new()),
+            Box::new(mise::MiseDetector::new()),
             Box::new(nix::NixDetector::new()),
             Box::new(system::SystemDetector::new()),
         ];

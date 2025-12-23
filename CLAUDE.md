@@ -24,6 +24,8 @@ src/
 │   ├── go.rs        # クロスプラットフォーム (go install)
 │   ├── yarn.rs      # クロスプラットフォーム (yarn global)
 │   ├── pnpm.rs      # クロスプラットフォーム (pnpm global)
+│   ├── gem.rs       # クロスプラットフォーム (RubyGems)
+│   ├── mise.rs      # クロスプラットフォーム
 │   ├── nix.rs       # macOS/Linux
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
 │   ├── snap.rs      # Linux
@@ -57,6 +59,8 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 - bun -g
 - yarn -g
 - pnpm -g
+- gem (RubyGems, クロスプラットフォーム)
+- mise (クロスプラットフォーム)
 - Cargo (クロスプラットフォーム)
 - pipx (クロスプラットフォーム)
 - go install (クロスプラットフォーム)
