@@ -4,6 +4,7 @@ mod gem;
 mod go;
 mod homebrew;
 mod mise;
+mod n;
 mod nix;
 mod npm;
 mod pipx;
@@ -100,6 +101,7 @@ impl PackageManagerRegistry {
     pub fn new() -> Self {
         let mut detectors: Vec<Box<dyn PackageManagerDetector>> = vec![
             Box::new(homebrew::HomebrewDetector::new()),
+            Box::new(n::NDetector::new()),
             Box::new(npm::NpmGlobalDetector::new()),
             Box::new(bun::BunGlobalDetector::new()),
             Box::new(cargo::CargoDetector::new()),
