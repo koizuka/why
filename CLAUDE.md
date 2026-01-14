@@ -26,6 +26,7 @@ src/
 │   ├── pnpm.rs      # クロスプラットフォーム (pnpm global)
 │   ├── gem.rs       # クロスプラットフォーム (RubyGems)
 │   ├── mise.rs      # クロスプラットフォーム
+│   ├── n.rs         # macOS/Linux (Node version manager)
 │   ├── nix.rs       # macOS/Linux
 │   ├── apt.rs       # Linux (Debian/Ubuntu)
 │   ├── snap.rs      # Linux
@@ -55,6 +56,7 @@ cargo run -- <command> # 実行 (例: cargo run -- git)
 ## 対応パッケージマネージャー
 
 - Homebrew (macOS, Linux)
+- n (Node version manager, macOS/Linux)
 - npm -g
 - bun -g
 - yarn -g

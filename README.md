@@ -71,6 +71,7 @@ why -v git
 | Package Manager | Platform | Detection Method |
 |-----------------|----------|------------------|
 | Homebrew | macOS, Linux | Cellar path pattern |
+| n (Node version manager) | macOS, Linux | n/versions path |
 | npm (global) | All | node_modules path |
 | bun (global) | All | .bun/bin path |
 | yarn (global) | All | .yarn/bin path |
