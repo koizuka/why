@@ -20,13 +20,9 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-    name: Build and Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        rust: [stable]
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -35,20 +31,80 @@ jobs:
         with:
           components: clippy, rustfmt
 
-      - name: Cache cargo registry
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
 
       - name: Check formatting
         run: cargo fmt --all -- --check
 
       - name: Clippy
         run: cargo clippy -- -D warnings
+
+  lint-windows:
+    name: Lint (Windows)
+    runs-on: ubuntu-latest
+    outputs:
+      has_windows_code: ${{ steps.check.outputs.has_windows_code }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check for Windows-specific code in changed files
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          changed_files=$(git diff --name-only "$base" HEAD -- '*.rs' || true)
+          has_windows_code=false
+          for file in $changed_files; do
+            if [ -f "$file" ] && grep -q 'cfg(target_os = "windows")' "$file"; then
+              echo "Found Windows-specific code in: $file"
+              has_windows_code=true
+              break
+            fi
+          done
+          echo "has_windows_code=$has_windows_code" >> "$GITHUB_OUTPUT"
+
+  lint-windows-run:
+    name: Lint (Windows) - Run
+    needs: lint-windows
+    if: needs.lint-windows.outputs.has_windows_code == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7 # stable
+        with:
+          components: clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+
+  build:
+    name: Build and Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7 # stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
       - name: Build
         run: cargo build --verbose
