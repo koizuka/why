@@ -22,10 +22,7 @@ env:
 jobs:
   lint:
     name: Lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
@@ -39,6 +36,54 @@ jobs:
 
       - name: Check formatting
         run: cargo fmt --all -- --check
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+
+  lint-windows:
+    name: Lint (Windows)
+    runs-on: ubuntu-latest
+    outputs:
+      has_windows_code: ${{ steps.check.outputs.has_windows_code }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check for Windows-specific code in changed files
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          changed_files=$(git diff --name-only "$base" HEAD -- '*.rs' || true)
+          has_windows_code=false
+          for file in $changed_files; do
+            if [ -f "$file" ] && grep -q 'cfg(target_os = "windows")' "$file"; then
+              echo "Found Windows-specific code in: $file"
+              has_windows_code=true
+              break
+            fi
+          done
+          echo "has_windows_code=$has_windows_code" >> "$GITHUB_OUTPUT"
+
+  lint-windows-run:
+    name: Lint (Windows) - Run
+    needs: lint-windows
+    if: needs.lint-windows.outputs.has_windows_code == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7 # stable
+        with:
+          components: clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
 
       - name: Clippy
         run: cargo clippy -- -D warnings
@@ -57,6 +102,9 @@ jobs:
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@401aff9a7a08acb9d27b64936a90db81024cff97 # v2.8.2
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
       - name: Build
         run: cargo build --verbose
