@@ -22,7 +22,7 @@ anyhow = "1.0"
 which = "8.0"
 
 # Regex for pattern matching
-regex = "1.10"
+regex = "1.12"
 
 # Colored output
 colored = "3.0"
