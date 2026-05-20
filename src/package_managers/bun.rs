@@ -28,10 +28,14 @@ impl PackageManagerDetector for BunGlobalDetector {
     }
 
     fn detect(&self, ctx: &DetectionContext) -> Option<DetectionResult> {
-        // ~/.bun/bin/ or ~/.bun/install/global/
+        // Unix: ~/.bun/bin/ or ~/.bun/install/global/
+        // Windows: %USERPROFILE%\.bun\bin\ or %USERPROFILE%\.bun\install\global\
         let matched = ctx.symlink_chain.iter().any(|p| {
             let s = p.to_string_lossy();
-            s.contains("/.bun/bin/") || s.contains("/.bun/install/global/")
+            s.contains("/.bun/bin/")
+                || s.contains("/.bun/install/global/")
+                || s.contains(r"\.bun\bin\")
+                || s.contains(r"\.bun\install\global\")
         });
 
         if matched {
@@ -59,18 +63,30 @@ impl PackageManagerDetector for BunGlobalDetector {
 
 fn extract_bun_package_name(path: &str) -> Option<String> {
     // Pattern: .../node_modules/{package}/... or .../node_modules/@{scope}/{package}/...
-    let idx = path.find("/node_modules/")?;
-    let after = &path[idx + "/node_modules/".len()..];
-    let parts: Vec<&str> = after.split('/').collect();
-    let first = parts.first()?;
-    if first.is_empty() || *first == ".bin" {
-        return None;
+    let patterns = ["/node_modules/", r"\node_modules\"];
+
+    for pattern in patterns {
+        let Some(idx) = path.find(pattern) else {
+            continue;
+        };
+        let after = &path[idx + pattern.len()..];
+        let parts: Vec<&str> = if pattern.contains('\\') {
+            after.split('\\').collect()
+        } else {
+            after.split('/').collect()
+        };
+        let Some(first) = parts.first() else {
+            continue;
+        };
+        if first.is_empty() || *first == ".bin" {
+            continue;
+        }
+        if first.starts_with('@') && parts.len() >= 2 && !parts[1].is_empty() {
+            return Some(format!("{}/{}", first, parts[1]));
+        }
+        return Some(first.to_string());
     }
-    if first.starts_with('@') && parts.len() >= 2 && !parts[1].is_empty() {
-        Some(format!("{}/{}", first, parts[1]))
-    } else {
-        Some(first.to_string())
-    }
+    None
 }
 
 #[cfg(test)]
@@ -126,6 +142,36 @@ mod tests {
             Some("vite".to_string())
         );
         assert_eq!(extract_bun_package_name("/Users/u/.bun/bin/codex"), None);
+        // Windows
+        assert_eq!(
+            extract_bun_package_name(
+                r"C:\Users\u\.bun\install\global\node_modules\@openai\codex\bin\codex.js"
+            ),
+            Some("@openai/codex".to_string())
+        );
+        assert_eq!(
+            extract_bun_package_name(
+                r"C:\Users\u\.bun\install\global\node_modules\vite\bin\vite.js"
+            ),
+            Some("vite".to_string())
+        );
+    }
+
+    #[test]
+    fn test_bun_windows_path() {
+        let detector = BunGlobalDetector::new();
+        let ctx = make_context(
+            "codex",
+            vec![
+                r"C:\Users\u\.bun\bin\codex",
+                r"C:\Users\u\.bun\install\global\node_modules\@openai\codex\bin\codex.js",
+            ],
+        );
+        let result = detector.detect(&ctx);
+        assert!(result.is_some());
+        let result = result.unwrap();
+        assert_eq!(result.manager_id, "bun_global");
+        assert_eq!(result.package_name, Some("@openai/codex".to_string()));
     }
 
     #[test]
