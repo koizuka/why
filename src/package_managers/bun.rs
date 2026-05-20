@@ -1,4 +1,5 @@
-use super::{Confidence, DetectionContext, DetectionResult, PackageManagerDetector};
+use super::node_global::{detect_node_global, SKIP_BIN};
+use super::{DetectionContext, DetectionResult, PackageManagerDetector};
 use crate::platform::Platform;
 
 /// Detector for bun global packages.
@@ -28,65 +29,17 @@ impl PackageManagerDetector for BunGlobalDetector {
     }
 
     fn detect(&self, ctx: &DetectionContext) -> Option<DetectionResult> {
-        // Unix: ~/.bun/bin/ or ~/.bun/install/global/
-        // Windows: %USERPROFILE%\.bun\bin\ or %USERPROFILE%\.bun\install\global\
-        let matched = ctx.symlink_chain.iter().any(|p| {
-            let s = p.to_string_lossy();
-            s.contains("/.bun/bin/")
-                || s.contains("/.bun/install/global/")
-                || s.contains(r"\.bun\bin\")
-                || s.contains(r"\.bun\install\global\")
-        });
-
-        if matched {
-            let package_name = ctx
-                .symlink_chain
-                .iter()
-                .filter_map(|p| extract_bun_package_name(&p.to_string_lossy()))
-                .next()
-                .or_else(|| Some(ctx.command_name.clone()));
-
-            return Some(DetectionResult {
-                manager_id: self.id().to_string(),
-                manager_name: self.name().to_string(),
-                package_name,
-                version: None,
-                confidence: Confidence::Medium,
-                command_path: ctx.command_path.clone(),
-                resolved_path: ctx.resolved_path.clone(),
-            });
-        }
-
-        None
+        detect_node_global(ctx, self.id(), self.name(), is_bun_global_path, SKIP_BIN)
     }
 }
 
-fn extract_bun_package_name(path: &str) -> Option<String> {
-    // Pattern: .../node_modules/{package}/... or .../node_modules/@{scope}/{package}/...
-    let patterns = ["/node_modules/", r"\node_modules\"];
-
-    for pattern in patterns {
-        let Some(idx) = path.find(pattern) else {
-            continue;
-        };
-        let after = &path[idx + pattern.len()..];
-        let parts: Vec<&str> = if pattern.contains('\\') {
-            after.split('\\').collect()
-        } else {
-            after.split('/').collect()
-        };
-        let Some(first) = parts.first() else {
-            continue;
-        };
-        if first.is_empty() || *first == ".bin" {
-            continue;
-        }
-        if first.starts_with('@') && parts.len() >= 2 && !parts[1].is_empty() {
-            return Some(format!("{}/{}", first, parts[1]));
-        }
-        return Some(first.to_string());
-    }
-    None
+fn is_bun_global_path(path: &str) -> bool {
+    // Unix: ~/.bun/bin/ or ~/.bun/install/global/
+    // Windows: %USERPROFILE%\.bun\bin\ or %USERPROFILE%\.bun\install\global\
+    path.contains("/.bun/bin/")
+        || path.contains("/.bun/install/global/")
+        || path.contains(r"\.bun\bin\")
+        || path.contains(r"\.bun\install\global\")
 }
 
 #[cfg(test)]
@@ -127,34 +80,6 @@ mod tests {
         let result = detector.detect(&ctx);
         assert!(result.is_some());
         assert_eq!(result.unwrap().manager_id, "bun_global");
-    }
-
-    #[test]
-    fn test_extract_bun_package_name() {
-        assert_eq!(
-            extract_bun_package_name(
-                "/Users/u/.bun/install/global/node_modules/@openai/codex/bin/codex.js"
-            ),
-            Some("@openai/codex".to_string())
-        );
-        assert_eq!(
-            extract_bun_package_name("/Users/u/.bun/install/global/node_modules/vite/bin/vite.js"),
-            Some("vite".to_string())
-        );
-        assert_eq!(extract_bun_package_name("/Users/u/.bun/bin/codex"), None);
-        // Windows
-        assert_eq!(
-            extract_bun_package_name(
-                r"C:\Users\u\.bun\install\global\node_modules\@openai\codex\bin\codex.js"
-            ),
-            Some("@openai/codex".to_string())
-        );
-        assert_eq!(
-            extract_bun_package_name(
-                r"C:\Users\u\.bun\install\global\node_modules\vite\bin\vite.js"
-            ),
-            Some("vite".to_string())
-        );
     }
 
     #[test]

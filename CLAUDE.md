@@ -16,6 +16,7 @@ src/
 │   └── symlink_analyzer.rs # シンボリックリンク追跡
 ├── package_managers/ # 各パッケージマネージャー検出
 │   ├── mod.rs       # PackageManagerDetector trait
+│   ├── node_global.rs # npm/bun/yarn/pnpm 共通の node_modules 抽出ヘルパー
 │   ├── homebrew.rs  # macOS/Linux
 │   ├── npm.rs       # クロスプラットフォーム
 │   ├── bun.rs       # クロスプラットフォーム
