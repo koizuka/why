@@ -11,26 +11,30 @@ const PATTERNS: &[(&str, char)] = &[("/node_modules/", '/'), (r"\node_modules\",
 
 /// Extract a package name (incl. `@scope/pkg`) from a path containing a
 /// `node_modules/<pkg>` (or `node_modules/@scope/<pkg>`) segment.
-/// Tries both Unix and Windows separators.
+/// Tries both Unix and Windows separators, and walks past skipped or
+/// empty first segments (e.g. pnpm's `node_modules/.pnpm/...` layout
+/// nests another `node_modules/<pkg>` later in the same string).
 pub(super) fn extract_node_modules_package_name(path: &str, skip_names: &[&str]) -> Option<String> {
     for (pattern, sep) in PATTERNS {
-        let Some(idx) = path.find(pattern) else {
-            continue;
-        };
-        let after = &path[idx + pattern.len()..];
-        let mut parts = after.split(*sep);
-        let first = parts.next()?;
-        if first.is_empty() || skip_names.contains(&first) {
-            continue;
-        }
-        if first.starts_with('@') {
-            let second = parts.next()?;
-            if !second.is_empty() {
-                return Some(format!("{first}/{second}"));
+        let mut search_start = 0;
+        while let Some(rel_idx) = path[search_start..].find(pattern) {
+            let idx = search_start + rel_idx;
+            search_start = idx + pattern.len();
+            let after = &path[search_start..];
+            let mut parts = after.split(*sep);
+            let first = parts.next().unwrap_or("");
+            if first.is_empty() || skip_names.contains(&first) {
+                continue;
             }
-            continue;
+            if first.starts_with('@') {
+                let second = parts.next().unwrap_or("");
+                if !second.is_empty() {
+                    return Some(format!("{first}/{second}"));
+                }
+                continue;
+            }
+            return Some(first.to_string());
         }
-        return Some(first.to_string());
     }
     None
 }
@@ -132,16 +136,41 @@ mod tests {
     }
 
     #[test]
-    fn pnpm_skip_returns_none_when_first_segment_is_pnpm_store() {
-        // The current implementation only inspects the first /node_modules/
-        // segment. When a pnpm path lands directly at `node_modules/.pnpm/...`,
-        // we return None and let the symlink-chain walker try other entries.
+    fn pnpm_returns_none_when_only_pnpm_store_segment_present() {
+        // No nested `node_modules/<pkg>` after `.pnpm/...` — there is no real
+        // package name to recover. The symlink-chain walker will fall back to
+        // the command name.
         assert_eq!(
             extract_node_modules_package_name(
                 "/home/u/.local/share/pnpm/global/5/node_modules/.pnpm/typescript@5.0.0",
                 SKIP_BIN_PNPM,
             ),
             None
+        );
+    }
+
+    #[test]
+    fn pnpm_nested_node_modules_yields_real_package() {
+        // Real pnpm layout: `node_modules/.pnpm/<pkg>@<ver>/node_modules/<pkg>/...`.
+        // After skipping `.pnpm`, the search continues and lands on the
+        // second `node_modules/typescript/` segment.
+        assert_eq!(
+            extract_node_modules_package_name(
+                "/home/u/.local/share/pnpm/global/5/node_modules/.pnpm/typescript@5.0.0/node_modules/typescript/bin/tsc",
+                SKIP_BIN_PNPM,
+            ),
+            Some("typescript".to_string())
+        );
+    }
+
+    #[test]
+    fn pnpm_nested_node_modules_yields_scoped_package() {
+        assert_eq!(
+            extract_node_modules_package_name(
+                "/home/u/.local/share/pnpm/global/5/node_modules/.pnpm/@angular+cli@17.0.0/node_modules/@angular/cli/bin/ng",
+                SKIP_BIN_PNPM,
+            ),
+            Some("@angular/cli".to_string())
         );
     }
 
