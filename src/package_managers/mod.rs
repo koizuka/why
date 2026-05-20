@@ -6,6 +6,7 @@ mod homebrew;
 mod mise;
 mod n;
 mod nix;
+mod node_global;
 mod npm;
 mod pipx;
 mod pnpm;
