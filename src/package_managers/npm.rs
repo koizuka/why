@@ -28,27 +28,30 @@ impl PackageManagerDetector for NpmGlobalDetector {
     }
 
     fn detect(&self, ctx: &DetectionContext) -> Option<DetectionResult> {
-        for path in &ctx.symlink_chain {
-            let path_str = path.to_string_lossy();
+        let matched = ctx.symlink_chain.iter().any(|p| {
+            let s = p.to_string_lossy();
+            s.contains("/node_modules/")
+                || s.contains("/.npm-global/")
+                || s.contains("/lib/node_modules/")
+        });
 
-            // Check common npm global patterns
-            if path_str.contains("/node_modules/")
-                || path_str.contains("/.npm-global/")
-                || path_str.contains("/lib/node_modules/")
-            {
-                // Try to extract package name from path
-                let package_name = extract_npm_package_name(&path_str);
+        if matched {
+            let package_name = ctx
+                .symlink_chain
+                .iter()
+                .filter_map(|p| extract_npm_package_name(&p.to_string_lossy()))
+                .next()
+                .or_else(|| Some(ctx.command_name.clone()));
 
-                return Some(DetectionResult {
-                    manager_id: self.id().to_string(),
-                    manager_name: self.name().to_string(),
-                    package_name,
-                    version: None,
-                    confidence: Confidence::Medium,
-                    command_path: ctx.command_path.clone(),
-                    resolved_path: ctx.resolved_path.clone(),
-                });
-            }
+            return Some(DetectionResult {
+                manager_id: self.id().to_string(),
+                manager_name: self.name().to_string(),
+                package_name,
+                version: None,
+                confidence: Confidence::Medium,
+                command_path: ctx.command_path.clone(),
+                resolved_path: ctx.resolved_path.clone(),
+            });
         }
 
         None
@@ -57,23 +60,18 @@ impl PackageManagerDetector for NpmGlobalDetector {
 
 fn extract_npm_package_name(path: &str) -> Option<String> {
     // Pattern: .../node_modules/{package}/... or .../node_modules/@{scope}/{package}/...
-    if let Some(idx) = path.find("/node_modules/") {
-        let after = &path[idx + 14..]; // skip "/node_modules/"
-        let parts: Vec<&str> = after.split('/').collect();
-
-        if let Some(first) = parts.first() {
-            if first.is_empty() {
-                return None;
-            }
-            if first.starts_with('@') && parts.len() >= 2 && !parts[1].is_empty() {
-                // Scoped package
-                return Some(format!("{}/{}", first, parts[1]));
-            } else {
-                return Some(first.to_string());
-            }
-        }
+    let idx = path.find("/node_modules/")?;
+    let after = &path[idx + "/node_modules/".len()..];
+    let parts: Vec<&str> = after.split('/').collect();
+    let first = parts.first()?;
+    if first.is_empty() || *first == ".bin" {
+        return None;
     }
-    None
+    if first.starts_with('@') && parts.len() >= 2 && !parts[1].is_empty() {
+        Some(format!("{}/{}", first, parts[1]))
+    } else {
+        Some(first.to_string())
+    }
 }
 
 #[cfg(test)]
@@ -151,6 +149,25 @@ mod tests {
         let ctx = make_context("eslint", vec!["/Users/user/.npm-global/bin/eslint"]);
         let result = detector.detect(&ctx);
         assert!(result.is_some());
+    }
+
+    #[test]
+    fn test_npm_scoped_package_via_npm_global_symlink() {
+        // Scoped package: the bin entry matches the detector but has no
+        // /node_modules/ segment — the scope must be read from the resolved target.
+        let detector = NpmGlobalDetector::new();
+        let ctx = make_context(
+            "ni",
+            vec![
+                "/Users/u/.npm-global/bin/ni",
+                "/Users/u/.npm-global/lib/node_modules/@antfu/ni/bin/ni.mjs",
+            ],
+        );
+        let result = detector.detect(&ctx);
+        assert!(result.is_some());
+        let result = result.unwrap();
+        assert_eq!(result.manager_id, "npm_global");
+        assert_eq!(result.package_name, Some("@antfu/ni".to_string()));
     }
 
     #[test]
